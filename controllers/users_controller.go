@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/SriHemnath/bookstore_users-api/domain/users"
 	"github.com/SriHemnath/bookstore_users-api/services"
@@ -20,11 +21,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	restErr := errors.RestError{
-		Message: "invalid json body",
-		Status:  http.StatusBadRequest,
-		Error:   "bad_request",
-	}
+	restErr := errors.NewBadRequestError("invalid json body")
 	if err = json.Unmarshal(byte, &user); err != nil {
 		fmt.Println("Error during unmarshelling ", err)
 		c.JSON(restErr.Status, restErr)
@@ -45,7 +42,17 @@ func FindUser(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "Implement me!")
+	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		err := errors.NewBadRequestError("user id should be a number")
+		c.JSON(err.Status, err)
+	}
+	user, getErr := services.GetUser(userId)
+	if getErr != nil {
+		c.JSON(getErr.Status, getErr)
+		return
+	}
+	c.JSON(http.StatusOK, user)
 }
 
 func DeleteUser(c *gin.Context) {
