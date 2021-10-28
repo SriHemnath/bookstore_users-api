@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	apiDateLayout = "25-01-2006T15:04:05Z" //DDMMYYY
+	apiDateLayout = "02-01-2006T15:04:05Z" //DDMMYYY
 )
 
 func GetNow() time.Time {
