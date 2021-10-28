@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -17,17 +16,15 @@ func CreateUser(c *gin.Context) {
 	var user users.User
 	byte, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 
 	restErr := errors.NewBadRequestError("invalid json body")
 	if err = json.Unmarshal(byte, &user); err != nil {
-		fmt.Println("Error during unmarshelling ", err)
 		c.JSON(restErr.Status, restErr)
 		return
 	}
-	//shouldBindJson will do the same unmarshelling and binding as above
 
 	result, saveErr := services.CreateUser(user)
 	if saveErr != nil {
@@ -35,10 +32,6 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, result)
-}
-
-func FindUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "Implement me!")
 }
 
 func GetUser(c *gin.Context) {
@@ -55,6 +48,35 @@ func GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+func UpdateUser(c *gin.Context) {
+	var user users.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		restErr := errors.NewBadRequestError("invalid json body")
+		c.JSON(restErr.Status, err)
+		return
+	}
+
+	isPartial := c.Request.Method == http.MethodPatch
+
+	result, err := services.UpdateUser(isPartial, user)
+	if err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
+
 func DeleteUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "Implement me!")
+	var user users.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		restErr := errors.NewBadRequestError("invalid json body")
+		c.JSON(restErr.Status, err)
+		return
+	}
+
+	if err := services.DeleteUser(user); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
 }
