@@ -11,4 +11,5 @@ func mapUrls() {
 	router.PUT("/user/update", controllers.UpdateUser)   //all fields should be present
 	router.PATCH("/user/update", controllers.UpdateUser) //will update incoming field
 	router.DELETE("/user/delete", controllers.DeleteUser)
+	router.GET("/user/search", controllers.Search)
 }
