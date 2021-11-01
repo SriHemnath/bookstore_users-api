@@ -2,11 +2,11 @@ package users
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/SriHemnath/bookstore_users-api/datasource/mysql/user_db"
 	"github.com/SriHemnath/bookstore_users-api/utils/errors"
+	"github.com/SriHemnath/bookstore_users-api/utils/logger"
 	"github.com/SriHemnath/bookstore_users-api/utils/mysql_utils"
 )
 
@@ -28,14 +28,14 @@ func (user *User) Get() *errors.RestError {
 
 	stmt, err := user_db.Client.Prepare(queryGetUser)
 	if err != nil {
-		log.Println("Error while creating statement", err)
+		logger.Error("Error while creating statement", err)
 		return errors.NewInternalServerError("Not able to get user")
 	}
 	defer stmt.Close()
 
 	result := stmt.QueryRow(user.ID)
 	if getErr := result.Scan(&user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); getErr != nil {
-		log.Println(getErr)
+		logger.Error("Error while getting result ", getErr)
 		return mysql_utils.ParseError(getErr)
 	}
 
@@ -57,14 +57,14 @@ func (user *User) GetUserByEmail() *errors.RestError {
 
 	stmt, err := user_db.Client.Prepare(queryGetByEmail)
 	if err != nil {
-		log.Println("Error while creating statement", err)
+		logger.Error("Error while creating statement", err)
 		return errors.NewInternalServerError("Not able to get user")
 	}
 	defer stmt.Close()
 
 	result := stmt.QueryRow(user.Email)
 	if getErr := result.Scan(&user.ID); getErr != nil {
-		log.Println(getErr)
+		logger.Error("Error while getting result", getErr)
 		return mysql_utils.ParseError(getErr)
 	}
 
@@ -75,7 +75,7 @@ func (user *User) Save() *errors.RestError {
 
 	stmt, err := user_db.Client.Prepare(queryInsertUser)
 	if err != nil {
-		log.Println("Error while creating statement", err)
+		logger.Error("Error while creating statement", err)
 		return errors.NewInternalServerError("Not able to save user")
 	}
 	defer stmt.Close()
@@ -85,14 +85,14 @@ func (user *User) Save() *errors.RestError {
 		if strings.Contains(err.Error(), email_UNIQUE) {
 			return errors.NewBadRequestError(fmt.Sprintf("email %s already exists", user.Email))
 		}
-		log.Println("Error while saving the user ", err)
+		logger.Error("Error while saving the user ", err)
 		return mysql_utils.ParseError(err)
 	}
 	//stmt.Exec(queryInsertUser, user.FirstName, user.LastName, user.Email, user.DateCreated)
 
 	user.ID, err = result.LastInsertId()
 	if err != nil {
-		log.Println("Error while saving the user. ID not generated ", err)
+		logger.Error("Error while saving the user. ID not generated ", err)
 		return errors.NewInternalServerError("error when tying to save user")
 	}
 
@@ -108,14 +108,14 @@ func (user *User) Save() *errors.RestError {
 func (user *User) Update() *errors.RestError {
 	stmt, err := user_db.Client.Prepare(queryUpdateUser)
 	if err != nil {
-		log.Println("Error while creating statement", err)
+		logger.Error("Error while creating statement", err)
 		return errors.NewInternalServerError("Not able to save user")
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.ID, user.Status)
 	if err != nil {
-		log.Println("Error while updating user ", err)
+		logger.Error("Error while updating user ", err)
 		return mysql_utils.ParseError(err)
 	}
 
@@ -125,13 +125,13 @@ func (user *User) Update() *errors.RestError {
 func (user *User) Delete() *errors.RestError {
 	stmt, err := user_db.Client.Prepare(queryDeleteUser)
 	if err != nil {
-		log.Println("Error while creating statement", err)
+		logger.Error("Error while creating statement", err)
 		return errors.NewInternalServerError("Not able to save user")
 	}
 	defer stmt.Close()
 
 	if _, err = stmt.Exec(user.ID); err != nil {
-		log.Println("Error while deleting user ", err)
+		logger.Error("Error while deleting user ", err)
 		return mysql_utils.ParseError(err)
 	}
 
@@ -143,14 +143,14 @@ func (user *User) GetByStatus(status string) ([]User, *errors.RestError) {
 
 	stmt, err := user_db.Client.Prepare(queryGetByStatus)
 	if err != nil {
-		log.Println("Error while creating statement", err)
+		logger.Error("Error while creating statement", err)
 		return nil, errors.NewInternalServerError("Not able to save user")
 	}
 	defer stmt.Close()
 
 	results, err := stmt.Query(status)
 	if err != nil {
-		log.Println("Error while creating statement", err)
+		logger.Error("Error while creating statement", err)
 		return nil, errors.NewInternalServerError("Not able to get users")
 	}
 	defer results.Close()

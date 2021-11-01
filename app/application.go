@@ -10,5 +10,5 @@ var (
 
 func StartApplication() {
 	mapUrls()
-	router.Run(":8080") //blocking call T
+	router.Run(":8080") //blocking call
 }

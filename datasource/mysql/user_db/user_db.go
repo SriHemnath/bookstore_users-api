@@ -3,8 +3,8 @@ package user_db
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
+	"github.com/SriHemnath/bookstore_users-api/utils/logger"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -24,5 +24,5 @@ func init() {
 	if err = Client.Ping(); err != nil {
 		panic(err)
 	}
-	log.Println("successfull connected to database")
+	logger.Info("Connection to db succeeded")
 }

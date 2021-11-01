@@ -1,6 +1,9 @@
 package app
 
-import "github.com/SriHemnath/bookstore_users-api/controllers"
+import (
+	"github.com/SriHemnath/bookstore_users-api/controllers"
+	"github.com/SriHemnath/bookstore_users-api/utils/logger"
+)
 
 //contains all mappings of the microservice
 func mapUrls() {
@@ -12,4 +15,5 @@ func mapUrls() {
 	router.PATCH("/user/update", controllers.UpdateUser) //will update incoming field
 	router.DELETE("/user/delete", controllers.DeleteUser)
 	router.GET("/user/search", controllers.Search)
+	logger.Info("Mapping urls successful")
 }
